@@ -9,7 +9,7 @@ import java.time.Duration
 
 object RemoteServer {
 
-    private val DEFAULT_CONNECTION_TIMEOUT = Duration.ofMillis(500)
+    private val DEFAULT_CONNECTION_TIMEOUT = Duration.ofMillis(3000)
 
     fun isRunning(uri: String = ServerSettings.serverUrl, timeout: Duration? = DEFAULT_CONNECTION_TIMEOUT): Boolean =
         isRunning(URI(uri), timeout)
@@ -31,6 +31,6 @@ object RemoteServer {
 }
 
 fun main() {
-    val isRunning = RemoteServer.isRunning(URI("ws://localhost:7654"))
+    val isRunning = RemoteServer.isRunning(URI(ServerSettings.serverUrl))
     println("isRunning: $isRunning")
 }

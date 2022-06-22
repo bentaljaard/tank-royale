@@ -1,0 +1,26 @@
+FROM registry.redhat.io/ubi8/openjdk-17:latest as builder
+USER root
+RUN microdnf --setopt=install_weak_deps=0 --setopt=tsflags=nodocs install -y unzip wget \
+    && microdnf clean all 
+RUN wget https://services.gradle.org/distributions/gradle-7.4.2-bin.zip \
+    && unzip gradle-7.4.2-bin.zip \
+    && mv gradle-7.4.2 /usr/local/gradle
+ENV PATH=/usr/local/gradle/bin:$PATH
+# RUN gradle --version
+RUN mkdir -p /tmp/app
+COPY src /tmp/app/src
+COPY *.kts *.pro /tmp/app/
+# COPY *.kts *.pro /tmp/app
+RUN cd /tmp/app && ls && gradle build --no-daemon
+
+
+
+
+# COPY target/lib/* /deployments/lib/
+# COPY target/*-runner.jar /deployments/quarkus-run.jar
+
+# EXPOSE 8080
+# USER 185
+# ENV AB_JOLOKIA_OFF=""
+# ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+# ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"

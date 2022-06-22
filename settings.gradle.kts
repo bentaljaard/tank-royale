@@ -2,7 +2,7 @@ val version = "0.13.4"
 
 // Schema Generator
 include("schema:jvm")
-include("schema:dotnet")
+//include("schema:dotnet")
 
 // Booter
 include("booter")
@@ -15,7 +15,7 @@ include("gui-app")
 
 // Bot API
 include("bot-api:java")
-include("bot-api:dotnet")
+//include("bot-api:dotnet")
 
 // Sample Bots archives
 include("sample-bots:java")
