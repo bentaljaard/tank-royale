@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tankroyalebot.fullname" . }}
+  labels:
+    {{- include "tankroyalebot.labels" . | nindent 4 }}
+  annotations:
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"{{ .Values.server.app }}"}]'
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "tankroyalebot.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tankroyalebot.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: code
+          configMap:
+            name: {{ include "tankroyalebot.fullname" . }}-code
+            defaultMode: 420
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tankroyalebot.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: code
+              mountPath: /deployments/ExternalCodeBot.java
+              subPath: ExternalCodeBot.java
+          env:
+            - name: BOT_NAME
+              value: {{ .Values.bot.name }}
+            - name: BOT_VERSION
+              value: '{{ .Values.bot.version }}'
+            - name: BOT_AUTHORS
+              value: Red Hat Demo
+            - name: BOT_GAME_TYPES
+              value: 'classic,melee'
+            - name: SERVER_URL
+              value: '{{ .Values.server.url }}'
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

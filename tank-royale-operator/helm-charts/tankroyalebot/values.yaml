@@ -1,0 +1,133 @@
+# Default values for tankroyalebot.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/bentaljaard/externalcodebot
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+labels:
+  app.openshift.io/runtime: java
+  app: tank-royal-bots
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+bot:
+  name: ""
+  version: ""
+  code: |
+    import dev.robocode.tankroyale.botapi.*;
+    import dev.robocode.tankroyale.botapi.events.*;
+
+    public class ExternalCodeBot extends Bot {
+
+        // The main method starts our bot
+        public static void main(String[] args) {
+            new ExternalCodeBot().start();
+        }
+
+        // Constructor, which loads the bot config file
+        ExternalCodeBot() {
+            super();
+        }
+
+        // Called when a new round is started -> initialize and do some movement
+        @Override
+        public void run() {
+            setBodyColor(Color.CYAN);
+            setTurretColor(Color.BLACK);
+            setRadarColor(Color.BLACK);
+            setScanColor(Color.YELLOW);
+
+            // Repeat while the bot is running
+            while (isRunning()) {
+                // Tell the game that when we take move, we'll also want to turn right... a lot
+                setTurnLeft(10_000);
+                // Limit our speed to 5
+                setMaxSpeed(5);
+                // Start moving (and turning)
+                forward(10_000);
+            }
+        }
+
+        // We scanned another bot -> fire hard!
+        @Override
+        public void onScannedBot(ScannedBotEvent e) {
+            fire(3);
+        }
+
+        // We hit another bot -> if it's our fault, we'll stop turning and moving,
+        // so we need to turn again to keep spinning.
+        @Override
+        public void onHitBot(HitBotEvent e) {
+            var direction = directionTo(e.getX(), e.getY());
+            var bearing = calcBearing(direction);
+            if (bearing > -10 && bearing < 10) {
+                fire(3);
+            }
+            if (e.isRammed()) {
+                turnLeft(10);
+            }
+        }
+    }
+
+
+server:
+  url: ""
+  app: ""
+
+
+

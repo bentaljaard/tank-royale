@@ -1,0 +1,166 @@
+
+---
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"tank-royale-server"}]'
+    app.openshift.io/route-disabled: 'false'
+    openshift.io/generated-by: OpenShiftWebConsole
+  name: bot1
+  namespace: tank-royale
+  labels:
+    app: bot1
+    app.kubernetes.io/component: bot1
+    app.kubernetes.io/instance: bot1
+    app.kubernetes.io/name: bot1
+    app.kubernetes.io/part-of: tank-royale-server
+    app.openshift.io/runtime: java
+    app.openshift.io/runtime-namespace: tank-royale
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - bot1
+        from:
+          kind: ImageStreamTag
+          namespace: tank-royale
+          name: 'externalcodebot:latest'
+        lastTriggeredImage: >-
+          quay.io/bentaljaard/externalcodebot@sha256:651b991264eb1ba2d09e5846c1342e1f26f7d707be907dcf533bbfe7f662f486
+    - type: ConfigChange
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    app: bot1
+    deploymentconfig: bot1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bot1
+        deploymentconfig: bot1
+      annotations:
+        openshift.io/generated-by: OpenShiftWebConsole
+    spec:
+      volumes:
+        - name: code
+          configMap:
+            name: bot1-code
+            defaultMode: 420
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: bot1
+          env:
+            - name: BOT_NAME
+              value: Bot1
+            - name: BOT_VERSION
+              value: '1.0'
+            - name: BOT_AUTHORS
+              value: Red Hat Demo
+            - name: BOT_GAME_TYPES
+              value: 'classic,melee'
+            - name: SERVER_URL
+              value: 'ws://tank-royale-server.tank-royale.svc:7654'
+          ports:
+            - containerPort: 7654
+              protocol: TCP
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: code
+              mountPath: /deployments/ExternalCodeBot.java
+              subPath: ExternalCodeBot.java
+          terminationMessagePolicy: File
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/tank-royale/externalcodebot:latest
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: bot1-code
+  namespace: tank-royale
+data:
+  ExternalCodeBot.java: |-
+    import dev.robocode.tankroyale.botapi.*;
+    import dev.robocode.tankroyale.botapi.events.*;
+
+    public class ExternalCodeBot extends Bot {
+
+        // The main method starts our bot
+        public static void main(String[] args) {
+            new ExternalCodeBot().start();
+        }
+
+        // Constructor, which loads the bot config file
+        ExternalCodeBot() {
+            super();
+        }
+
+        // Called when a new round is started -> initialize and do some movement
+        @Override
+        public void run() {
+            setBodyColor(Color.CYAN);
+            setTurretColor(Color.BLACK);
+            setRadarColor(Color.BLACK);
+            setScanColor(Color.YELLOW);
+
+            // Repeat while the bot is running
+            while (isRunning()) {
+                // Tell the game that when we take move, we'll also want to turn right... a lot
+                setTurnLeft(10_000);
+                // Limit our speed to 5
+                setMaxSpeed(5);
+                // Start moving (and turning)
+                forward(10_000);
+            }
+        }
+
+        // We scanned another bot -> fire hard!
+        @Override
+        public void onScannedBot(ScannedBotEvent e) {
+            fire(3);
+        }
+
+        // We hit another bot -> if it's our fault, we'll stop turning and moving,
+        // so we need to turn again to keep spinning.
+        @Override
+        public void onHitBot(HitBotEvent e) {
+            var direction = directionTo(e.getX(), e.getY());
+            var bearing = calcBearing(direction);
+            if (bearing > -10 && bearing < 10) {
+                fire(3);
+            }
+            if (e.isRammed()) {
+                turnLeft(10);
+            }
+        }
+    }
+
+
+
+

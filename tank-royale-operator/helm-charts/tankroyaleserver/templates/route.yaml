@@ -1,0 +1,18 @@
+{{- if .Values.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "tankroyaleserver.fullname" . }}
+  labels: {{ .Values.route.labels }}
+  annotations:
+    {{- include "tankroyaleserver.labels" . | nindent 4 }}
+spec:
+  host: 
+  port:
+    targetPort: {{ .Values.service.port }}-tcp
+  to:
+    kind: Service
+    name: {{ include "tankroyaleserver.fullname" . }}
+    weight: 100
+  wildcardPolicy: None
+{{- end }}

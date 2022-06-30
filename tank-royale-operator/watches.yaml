@@ -1,0 +1,10 @@
+# Use the 'create api' subcommand to add watches to this file.
+- group: tank-royale.quay.io
+  version: v1alpha1
+  kind: TankRoyaleServer
+  chart: helm-charts/tankroyaleserver
+- group: tank-royale.quay.io
+  version: v1alpha1
+  kind: TankRoyaleBot
+  chart: helm-charts/tankroyalebot
+#+kubebuilder:scaffold:watch

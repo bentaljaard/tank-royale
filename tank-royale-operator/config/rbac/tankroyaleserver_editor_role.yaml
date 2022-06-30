@@ -1,0 +1,24 @@
+# permissions for end users to edit tankroyaleservers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tankroyaleserver-editor-role
+rules:
+- apiGroups:
+  - tank-royale.quay.io
+  resources:
+  - tankroyaleservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - tank-royale.quay.io
+  resources:
+  - tankroyaleservers/status
+  verbs:
+  - get

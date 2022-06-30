@@ -1,0 +1,5 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- tank-royale_v1alpha1_tankroyaleserver.yaml
+- tank-royale_v1alpha1_tankroyalebot.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

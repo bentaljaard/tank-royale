@@ -4,8 +4,8 @@ import dev.robocode.tankroyale.botapi.events.*;
 // ------------------------------------------------------------------
 // TrackFire
 // ------------------------------------------------------------------
-// A sample bot original made for Robocode by Mathew Nelson.
-// Ported to Robocode Tank Royale by Flemming N. Larsen.
+// A sample bot original made for Robocode by Mahew Nelson.
+// Ported to Robotcode Tank Royale by Flemming N. Larsen.
 //
 // Sits still. Tracks and fires at the nearest bot it sees.
 // ------------------------------------------------------------------

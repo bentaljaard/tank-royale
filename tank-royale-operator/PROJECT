@@ -1,0 +1,23 @@
+domain: quay.io
+layout:
+- helm.sdk.operatorframework.io/v1
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: tank-royale-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: quay.io
+  group: tank-royale
+  kind: TankRoyaleServer
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: quay.io
+  group: tank-royale
+  kind: TankRoyaleBot
+  version: v1alpha1
+version: "3"
