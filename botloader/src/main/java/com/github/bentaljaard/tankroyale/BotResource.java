@@ -28,12 +28,11 @@ public class BotResource {
     @Path("/bot")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<BotConfig> listBots(){
-        //TODO: list all bots (get CRs in namespace)
-        return new ArrayList<BotConfig>();
+    public List<TankRoyaleBot> listBots(){
+        return bc.getAllBots().getItems();
     }
 
-    
+    //TODO: list bot per id
     //TODO: Remove bots (cleanup indiviual or all)
     //TODO: Update bot (eg. update code)
 }

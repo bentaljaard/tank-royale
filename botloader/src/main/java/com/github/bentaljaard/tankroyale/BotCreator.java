@@ -32,6 +32,16 @@ public class BotCreator {
 
     }
 
+    public KubernetesResourceList<TankRoyaleBot> getAllBots(){
+        //Create an API client for the CR
+        MixedOperation<TankRoyaleBot,KubernetesResourceList<TankRoyaleBot>,Resource<TankRoyaleBot>> botClient = 
+        oc.resources(TankRoyaleBot.class);
+
+        //Use current namespace
+        String currentNamespace = oc.getNamespace();
+        return botClient.inNamespace(currentNamespace).list();
+    }
+
     public boolean createBot(String name, String encodedCode){
         if (encodedCode == null || encodedCode.isBlank()){
             //Load default code template
